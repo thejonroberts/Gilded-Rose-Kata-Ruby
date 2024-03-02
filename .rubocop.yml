@@ -11,3 +11,16 @@ Style/Documentation:
 
 Style/FrozenStringLiteralComment:
   Enabled: false
+
+# TODO:
+Metrics:
+  Enabled: false
+
+Style/IfUnlessModifier:
+  Enabled: false
+
+Style/NumericPredicate:
+  Enabled: false
+
+Style/SoleNestedConditional:
+  Enabled: false

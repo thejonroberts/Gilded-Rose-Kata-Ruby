@@ -1,0 +1,13 @@
+require: rubocop-rspec
+
+AllCops:
+  Exclude:
+    - Gemfile
+    - texttest_fixture.rb
+    - gilded_rose_tests.rb
+
+Style/Documentation:
+  Enabled: false
+
+Style/FrozenStringLiteralComment:
+  Enabled: false

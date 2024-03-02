@@ -1,6 +1,7 @@
 require: rubocop-rspec
 
 AllCops:
+  NewCops: disable
   Exclude:
     - Gemfile
     - texttest_fixture.rb
@@ -23,4 +24,7 @@ Style/NumericPredicate:
   Enabled: false
 
 Style/SoleNestedConditional:
+  Enabled: false
+
+RSpec/MultipleExpectations:
   Enabled: false

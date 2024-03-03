@@ -3,75 +3,130 @@ require 'rspec'
 require File.join(File.dirname(__FILE__), 'gilded_rose')
 
 describe GildedRose do
+  let(:days) { 0..29 }
+  let(:debug) { false }
+
   describe '#update_quality' do
-    it 'does not change the name' do
-      items = [Item.new('foo', 0, 0)]
-      described_class.new(items).update_quality
-      expect(items[0].name).to eq 'foo'
+    # use the patterns from texttest expectations (without installing TextTest)
+    shared_examples_for 'known pattern' do |thing|
+      let(:name) { thing[:name] }
+      let(:sell_in_by_day) { thing[:sell_in_by_day] }
+      let(:quality_by_day) { thing[:quality_by_day] }
+
+      it 'sets sell_in' do
+        days.each do |day|
+          puts "-------- day #{day} --------" if debug
+          item = Item.new(
+            name,
+            sell_in_by_day[day],
+            quality_by_day[day] || 0
+          )
+          puts item.inspect if debug
+          items = [item]
+          described_class.new(items).update_quality
+          result = items[0]
+          expect(result.sell_in).to eq(sell_in_by_day[day + 1])
+        end
+      end
+
+      it 'sets quality' do
+        days.each do |day|
+          puts "-------- day #{day} --------" if debug
+          item = Item.new(
+            name,
+            sell_in_by_day[day],
+            quality_by_day[day] || 0
+          )
+          puts item.inspect if debug
+          items = [item]
+          described_class.new(items).update_quality
+          result = items[0]
+          expect(result.quality).to eq quality_by_day[day + 1]
+        end
+      end
     end
 
-    it 'decreases the sell_in and quality for regular items' do
-      item = Item.new('Regular Item', 5, 10)
-      gilded_rose = described_class.new([item])
-      gilded_rose.update_quality
-      expect(item.quality).to eq(9)
-      expect(item.sell_in).to eq(4)
+    context 'with vest' do
+      it_behaves_like 'known pattern', {
+        name: '+5 Dexterity Vest',
+        sell_in_by_day: [10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5, -6, -7, -8, -9, -10,
+                         -11, -12, -13, -14, -15, -16, -17, -18, -19, -20],
+        quality_by_day: [20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 8, 6, 4, 2, 0, 0, 0, 0, 0, 0,
+                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      }
     end
 
-    it 'decreases quality twice as fast when sell_in is negative for regular items' do
-      item = Item.new('Regular Item', 0, 10)
-      gilded_rose = described_class.new([item])
-      gilded_rose.update_quality
-      expect(item.quality).to eq(8)
+    context 'with aged brie' do
+      it_behaves_like 'known pattern', {
+        name: 'Aged Brie',
+        sell_in_by_day: [2, 1, 0, -1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12, -13, -14, -15, -16, -17, -18, -19, -20, -21, -22, -23, -24, -25, -26, -27, -28],
+        quality_by_day: [0, 1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38,
+                         40, 42, 44, 46, 48, 50, 50, 50, 50, 50]
+      }
     end
 
-    it 'increases the quality of Aged Brie' do
-      item = Item.new('Aged Brie', 5, 10)
-      gilded_rose = described_class.new([item])
-      gilded_rose.update_quality
-      expect(item.quality).to eq(11)
+    context 'with Elixir of the Mongoose' do
+      it_behaves_like 'known pattern', {
+        name: 'Elixir of the Mongoose',
+        sell_in_by_day: [5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12, -13, -14, -15, -16, -17, -18, -19, -20, -21, -22, -23, -24, -25],
+        quality_by_day: [7, 6, 5, 4, 3, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                         0, 0, 0, 0, 0, 0]
+      }
     end
 
-    it 'does not increase the quality of Aged Brie beyond 50' do
-      item = Item.new('Aged Brie', 5, 50)
-      gilded_rose = described_class.new([item])
-      gilded_rose.update_quality
-      expect(item.quality).to eq(50)
+    context 'with Sulfuras, Hand of Ragnaros A' do
+      it_behaves_like 'known pattern', {
+        name: 'Sulfuras, Hand of Ragnaros',
+        sell_in_by_day: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        quality_by_day: [80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
+                         80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80]
+      }
     end
 
-    it 'increases the quality of Backstage passes as sell_in approaches' do
-      item = Item.new('Backstage passes to a TAFKAL80ETC concert', 11, 20)
-      gilded_rose = described_class.new([item])
-      gilded_rose.update_quality
-      expect(item.quality).to eq(21)
+    context 'with Sulfuras, Hand of Ragnaros B' do
+      it_behaves_like 'known pattern', {
+        name: 'Sulfuras, Hand of Ragnaros',
+        sell_in_by_day: [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        quality_by_day: [80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
+                         80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80]
+      }
     end
 
-    it 'increases the quality of Backstage passes by 2 when sell_in is 10 or less' do
-      item = Item.new('Backstage passes to a TAFKAL80ETC concert', 10, 20)
-      gilded_rose = described_class.new([item])
-      gilded_rose.update_quality
-      expect(item.quality).to eq(22)
+    context 'with Backstage passes to a TAFKAL80ETC concert A' do
+      it_behaves_like 'known pattern', {
+        name: 'Backstage passes to a TAFKAL80ETC concert',
+        sell_in_by_day: [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12, -13, -14, -15],
+        quality_by_day: [20, 21, 22, 23, 24, 25, 27, 29, 31, 33, 35, 38, 41, 44, 47, 50, 0, 0, 0,
+                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      }
     end
 
-    it 'increases the quality of Backstage passes by 3 when sell_in is 5 or less' do
-      item = Item.new('Backstage passes to a TAFKAL80ETC concert', 5, 20)
-      gilded_rose = described_class.new([item])
-      gilded_rose.update_quality
-      expect(item.quality).to eq(23)
+    context 'with Backstage passes to a TAFKAL80ETC concert B' do
+      it_behaves_like 'known pattern', {
+        name: 'Backstage passes to a TAFKAL80ETC concert',
+        sell_in_by_day: [10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12, -13, -14, -15, -16, -17, -18, -19, -20],
+        quality_by_day: [49, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 0, 0,
+                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      }
     end
 
-    it 'sets the quality of Backstage passes to 0 after the concert' do
-      item = Item.new('Backstage passes to a TAFKAL80ETC concert', 0, 20)
-      gilded_rose = described_class.new([item])
-      gilded_rose.update_quality
-      expect(item.quality).to eq(0)
+    context 'with Backstage passes to a TAFKAL80ETC concert C' do
+      it_behaves_like 'known pattern', {
+        name: 'Backstage passes to a TAFKAL80ETC concert',
+        sell_in_by_day: [5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12, -13, -14, -15, -16, -17, -18, -19, -20, -21, -22, -23, -24, -25],
+        quality_by_day: [49, 50, 50, 50, 50, 50, 0, 0, 0, 0, 0, 0, 0,
+                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      }
     end
 
-    it 'does not decrease the quality of Sulfuras' do
-      item = Item.new('Sulfuras, Hand of Ragnaros', 5, 80)
-      gilded_rose = described_class.new([item])
-      gilded_rose.update_quality
-      expect(item.quality).to eq(80)
+    xcontext 'Conjured Mana Cake' do
+      # TODO: not implemented
+      it_behaves_like 'known pattern', {
+        name: 'Conjured Mana Cake',
+        sell_in_by_day: [5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12, -13, -14, -15, -16, -17, -18, -19, -20, -21, -22, -23, -24, -25],
+        quality_by_day: [49, 50, 50, 50, 50, 50, 0, 0, 0, 0, 0, 0, 0,
+                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      }
     end
   end
 end

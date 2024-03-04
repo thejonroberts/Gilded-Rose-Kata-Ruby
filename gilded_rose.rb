@@ -1,26 +1,3 @@
-class GildedRose
-  def initialize(items)
-    @items = items
-  end
-
-  def update_quality
-    @items = @items.map do |item|
-      this_item = case item.name
-                  when 'Sulfuras, Hand of Ragnaros'
-                    CollectorsItem.new(item.name, item.sell_in, item.quality)
-                  when 'Aged Brie'
-                    AgedItem.new(item.name, item.sell_in, item.quality)
-                  when 'Backstage passes to a TAFKAL80ETC concert'
-                    BackstagePass.new(item.name, item.sell_in, item.quality)
-                  else
-                    Item.new(item.name, item.sell_in, item.quality)
-                  end
-      this_item.end_of_day_update
-      this_item
-    end
-  end
-end
-
 class Item
   attr_accessor :name, :sell_in, :quality
 
@@ -74,5 +51,30 @@ class BackstagePass < Item
     @quality += 1 if @sell_in < 10
     @quality += 1 if @sell_in < 5
     @quality = 0 if @sell_in < 0
+  end
+end
+
+class GildedRose
+  DEFAULT_CLASS = Item
+  SPECIAL_CLASSES = {
+    'Sulfuras, Hand of Ragnaros' => CollectorsItem,
+    'Aged Brie' => AgedItem,
+    'Backstage passes to a TAFKAL80ETC concert' => BackstagePass
+  }.freeze
+
+  def initialize(items)
+    @items = items
+  end
+
+  def klass_for(name)
+    SPECIAL_CLASSES[name] || DEFAULT_CLASS
+  end
+
+  def update_quality
+    @items = @items.map do |item|
+      this_item = klass_for(item.name).new(item.name, item.sell_in, item.quality)
+      this_item.end_of_day_update
+      this_item
+    end
   end
 end

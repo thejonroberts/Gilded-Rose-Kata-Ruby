@@ -19,11 +19,11 @@ class Item
 
   def update_quality
     @quality -= 1
-    @quality -= 1 if @sell_in < 0
+    @quality -= 1 if @sell_in.negative?
   end
 
   def limit_quality
-    @quality = 0 if @quality < 0
+    @quality = 0 if @quality.negative?
     @quality = 50 if @quality > 50
   end
 
@@ -41,7 +41,7 @@ end
 class AgedItem < Item
   def update_quality
     @quality += 1
-    @quality += 1 if @sell_in < 0
+    @quality += 1 if @sell_in.negative?
   end
 end
 
@@ -50,31 +50,29 @@ class BackstagePass < Item
     @quality += 1
     @quality += 1 if @sell_in < 10
     @quality += 1 if @sell_in < 5
-    @quality = 0 if @sell_in < 0
+    @quality = 0 if @sell_in.negative?
   end
 end
 
 class GildedRose
-  DEFAULT_CLASS = Item
-  SPECIAL_CLASSES = {
+  DEFAULT_ITEM_CLASS = Item
+  SPECIAL_ITEM_CLASSES = {
     'Sulfuras, Hand of Ragnaros' => CollectorsItem,
     'Aged Brie' => AgedItem,
     'Backstage passes to a TAFKAL80ETC concert' => BackstagePass
   }.freeze
 
   def initialize(items)
-    @items = items
-  end
-
-  def klass_for(name)
-    SPECIAL_CLASSES[name] || DEFAULT_CLASS
+    @items = items.map { |item| klass_for(item.name).new(item.name, item.sell_in, item.quality) }
   end
 
   def update_quality
-    @items = @items.map do |item|
-      this_item = klass_for(item.name).new(item.name, item.sell_in, item.quality)
-      this_item.end_of_day_update
-      this_item
-    end
+    @items.each(&:end_of_day_update)
+  end
+
+  private
+
+  def klass_for(name)
+    SPECIAL_ITEM_CLASSES[name] || DEFAULT_ITEM_CLASS
   end
 end

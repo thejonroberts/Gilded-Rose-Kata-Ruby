@@ -13,9 +13,9 @@ class GildedRose
                   when 'Backstage passes to a TAFKAL80ETC concert'
                     BackstagePass.new(item.name, item.sell_in, item.quality)
                   else
-                    DepreciatingItem.new(item.name, item.sell_in, item.quality)
+                    Item.new(item.name, item.sell_in, item.quality)
                   end
-      this_item.update_quality
+      this_item.end_of_day_update
       this_item
     end
   end
@@ -30,7 +30,25 @@ class Item
     @quality = quality
   end
 
-  def update_quality; end
+  def end_of_day_update
+    update_sell_in
+    update_quality
+    limit_quality
+  end
+
+  def update_sell_in
+    @sell_in -= 1
+  end
+
+  def update_quality
+    @quality -= 1
+    @quality -= 1 if @sell_in < 0
+  end
+
+  def limit_quality
+    @quality = 0 if @quality < 0
+    @quality = 50 if @quality > 50
+  end
 
   def to_s
     "#{@name}, #{@sell_in}, #{@quality}"
@@ -38,32 +56,23 @@ class Item
 end
 
 class CollectorsItem < Item
+  def update_sell_in; end
   def update_quality; end
-end
-
-class DepreciatingItem < Item
-  def update_quality
-    @sell_in -= 1
-    @quality -= 1 if @quality > 0
-    @quality -= 1 if @sell_in < 0 && @quality > 0
-  end
+  def limit_quality; end
 end
 
 class AgedItem < Item
   def update_quality
-    @sell_in -= 1
-    @quality += 1 if @quality < 50
-    @quality += 1 if @sell_in < 0 && @quality < 50
+    @quality += 1
+    @quality += 1 if @sell_in < 0
   end
 end
 
 class BackstagePass < Item
   def update_quality
-    @sell_in -= 1
     @quality += 1
     @quality += 1 if @sell_in < 10
     @quality += 1 if @sell_in < 5
-    @quality = 50 if @quality > 50
     @quality = 0 if @sell_in < 0
   end
 end

@@ -4,12 +4,18 @@ class GildedRose
   end
 
   def update_quality
-    @items.each do |item|
-      return no_update item if item.name == 'Sulfuras, Hand of Ragnaros'
+    @items = @items.map do |item|
+      if item.name == 'Sulfuras, Hand of Ragnaros'
+        return no_update item
+      end
 
-      return brie_update item if item.name == 'Aged Brie'
+      if item.name == 'Aged Brie'
+        return brie_update item
+      end
 
-      return backstage_pass_update item if item.name == 'Backstage passes to a TAFKAL80ETC concert'
+      if item.name == 'Backstage passes to a TAFKAL80ETC concert'
+        return backstage_pass_update item
+      end
 
       normal_update item
     end
@@ -60,4 +66,12 @@ class Item
   def to_s
     "#{@name}, #{@sell_in}, #{@quality}"
   end
+end
+
+class CollectorsItem
+  attr_accessor :name, :sell_in, :quality
+
+  def limit_quality; end
+  def update_quality; end
+  def update_sell_in; end
 end

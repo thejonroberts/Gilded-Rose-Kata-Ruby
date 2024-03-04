@@ -4,7 +4,7 @@ require File.join(File.dirname(__FILE__), 'gilded_rose')
 
 describe GildedRose do
   let(:days) { 0..29 }
-  let(:debug) { false }
+  let(:debug) { true }
 
   describe '#update_quality' do
     # use the patterns from texttest expectations (without installing TextTest)
@@ -16,16 +16,16 @@ describe GildedRose do
       it 'sets sell_in' do
         days.each do |day|
           item = Item.new(name, sell_in_by_day[day], quality_by_day[day] || 0)
-          described_class.new([item]).update_quality
-          expect(item.sell_in).to eq(sell_in_by_day[day + 1])
+          results = described_class.new([item]).update_quality
+          expect(results[0].sell_in).to eq(sell_in_by_day[day + 1])
         end
       end
 
       it 'sets quality' do
         days.each do |day|
           item = Item.new(name, sell_in_by_day[day], quality_by_day[day] || 0)
-          described_class.new([item]).update_quality
-          expect(item.quality).to eq quality_by_day[day + 1]
+          results = described_class.new([item]).update_quality
+          expect(results[0].quality).to eq quality_by_day[day + 1]
         end
       end
     end

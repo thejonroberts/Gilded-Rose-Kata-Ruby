@@ -5,48 +5,19 @@ class GildedRose
 
   def update_quality
     @items = @items.map do |item|
-      if item.name == 'Sulfuras, Hand of Ragnaros'
-        return no_update item
-      end
-
-      if item.name == 'Aged Brie'
-        return brie_update item
-      end
-
-      if item.name == 'Backstage passes to a TAFKAL80ETC concert'
-        return backstage_pass_update item
-      end
-
-      normal_update item
+      this_item = case item.name
+                  when 'Sulfuras, Hand of Ragnaros'
+                    CollectorsItem.new(item.name, item.sell_in, item.quality)
+                  when 'Aged Brie'
+                    AgedItem.new(item.name, item.sell_in, item.quality)
+                  when 'Backstage passes to a TAFKAL80ETC concert'
+                    BackstagePass.new(item.name, item.sell_in, item.quality)
+                  else
+                    DepreciatingItem.new(item.name, item.sell_in, item.quality)
+                  end
+      this_item.update_quality
+      this_item
     end
-  end
-
-  def no_update(item)
-    item
-  end
-
-  def normal_update(item)
-    item.sell_in -= 1
-    item.quality -= 1 if item.quality > 0
-    item.quality -= 1 if item.sell_in < 0 && item.quality > 0
-    item
-  end
-
-  def brie_update(item)
-    item.sell_in -= 1
-    item.quality += 1 if item.quality < 50
-    item.quality += 1 if item.sell_in < 0 && item.quality < 50
-    item
-  end
-
-  def backstage_pass_update(item)
-    item.sell_in -= 1
-    item.quality += 1
-    item.quality += 1 if item.sell_in < 10
-    item.quality += 1 if item.sell_in < 5
-    item.quality = 50 if item.quality > 50
-    item.quality = 0 if item.sell_in < 0
-    item
   end
 end
 
@@ -59,19 +30,40 @@ class Item
     @quality = quality
   end
 
-  def limit_quality; end
   def update_quality; end
-  def update_sell_in; end
 
   def to_s
     "#{@name}, #{@sell_in}, #{@quality}"
   end
 end
 
-class CollectorsItem
-  attr_accessor :name, :sell_in, :quality
-
-  def limit_quality; end
+class CollectorsItem < Item
   def update_quality; end
-  def update_sell_in; end
+end
+
+class DepreciatingItem < Item
+  def update_quality
+    @sell_in -= 1
+    @quality -= 1 if @quality > 0
+    @quality -= 1 if @sell_in < 0 && @quality > 0
+  end
+end
+
+class AgedItem < Item
+  def update_quality
+    @sell_in -= 1
+    @quality += 1 if @quality < 50
+    @quality += 1 if @sell_in < 0 && @quality < 50
+  end
+end
+
+class BackstagePass < Item
+  def update_quality
+    @sell_in -= 1
+    @quality += 1
+    @quality += 1 if @sell_in < 10
+    @quality += 1 if @sell_in < 5
+    @quality = 50 if @quality > 50
+    @quality = 0 if @sell_in < 0
+  end
 end

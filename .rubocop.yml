@@ -14,17 +14,8 @@ Style/FrozenStringLiteralComment:
   Enabled: false
 
 # TODO:
-Metrics:
-  Enabled: false
-
-Style/IfUnlessModifier:
-  Enabled: false
-
-Style/NumericPredicate:
-  Enabled: false
-
-Style/SoleNestedConditional:
-  Enabled: false
-
 RSpec/MultipleExpectations:
+  Enabled: false
+
+RSpec/ExampleLength:
   Enabled: false

@@ -34,12 +34,6 @@ class NormalItem < Item
   end
 end
 
-class LegendaryItem < NormalItem
-  def update_sell_in; end
-  def update_quality; end
-  def limit_quality; end
-end
-
 class AgedItem < NormalItem
   def update_quality
     @quality += 1
@@ -56,11 +50,25 @@ class BackstagePass < NormalItem
   end
 end
 
+class ConjuredItem < NormalItem
+  def update_quality
+    @quality -= 2
+    @quality -= 2 if @sell_in.negative?
+  end
+end
+
+class LegendaryItem < NormalItem
+  def update_sell_in; end
+  def update_quality; end
+  def limit_quality; end
+end
+
 class GildedRose
   DEFAULT_ITEM_CLASS = NormalItem
   SPECIAL_ITEM_CLASSES = {
     'Sulfuras, Hand of Ragnaros' => LegendaryItem,
     'Aged Brie' => AgedItem,
+    'Conjured Mana Cake' => ConjuredItem,
     'Backstage passes to a TAFKAL80ETC concert' => BackstagePass
   }.freeze
 

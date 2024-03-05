@@ -57,12 +57,6 @@ describe GildedRose do
                       [5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12, -13, -14, -15, -16, -17,
                        -18, -19, -20, -21, -22, -23, -24, -25],
                       [7, 6, 5, 4, 3, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-
-      it_behaves_like 'known pattern',
-                      'Conjured Mana Cake',
-                      [3, 2, 1, 0, -1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12, -13, -14, -15, -16, -17, -18,
-                       -19, -20, -21, -22, -23, -24, -25, -26, -27],
-                      [6, 5, 4, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     end
 
     context 'with aged items' do
@@ -176,10 +170,33 @@ describe GildedRose do
                        0]
     end
 
-    xcontext 'with conjured items' do
-      # We have recently signed a supplier of conjured items. This requires an update to our system:
-      # "Conjured" items degrade in Quality twice as fast as normal items
-      # Once the sell by date has passed, Quality degrades twice as fast
+    context 'with conjured items' do
+      it 'reduces quality by 2 per day prior to sell date' do
+        item = Item.new('Conjured Mana Cake', 10, 10)
+        results = described_class.new([item]).update_quality
+        expect(results[0].quality).to eq 8
+      end
+
+      it 'reduces quality by 4 per day after sell date' do
+        item = Item.new('Conjured Mana Cake', 0, 10)
+        results = described_class.new([item]).update_quality
+        expect(results[0].quality).to eq 6
+      end
+
+      it 'does not reduce quality below zero' do
+        item = Item.new('Conjured Mana Cake', 0, 0)
+        results = described_class.new([item]).update_quality
+        expect(results[0].quality).to eq 0
+      end
+
+      # NOTE: This is the original quality pattern from unimplemented test files, which does not match
+      # feature request. Used matches feature request/above specs.
+      # [6, 5, 4, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      it_behaves_like 'known pattern',
+                      'Conjured Mana Cake',
+                      [3, 2, 1, 0, -1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12, -13, -14, -15, -16, -17, -18,
+                       -19, -20, -21, -22, -23, -24, -25, -26, -27],
+                      [12, 10, 8, 6, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     end
   end
 end

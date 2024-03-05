@@ -34,7 +34,7 @@ class NormalItem < Item
   end
 end
 
-class CollectorsItem < NormalItem
+class LegendaryItem < NormalItem
   def update_sell_in; end
   def update_quality; end
   def limit_quality; end
@@ -59,7 +59,7 @@ end
 class GildedRose
   DEFAULT_ITEM_CLASS = NormalItem
   SPECIAL_ITEM_CLASSES = {
-    'Sulfuras, Hand of Ragnaros' => CollectorsItem,
+    'Sulfuras, Hand of Ragnaros' => LegendaryItem,
     'Aged Brie' => AgedItem,
     'Backstage passes to a TAFKAL80ETC concert' => BackstagePass
   }.freeze

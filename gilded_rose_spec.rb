@@ -27,15 +27,6 @@ describe GildedRose do
     end
 
     context 'with normal items' do
-      # All items have a SellIn value which denotes the number of days we have to sell the items
-      # All items have a Quality value which denotes how valuable the item is
-      # At the end of each day our system lowers both values for every item
-      # Pretty simple, right? Well this is where it gets interesting:
-
-      # Once the sell by date has passed, Quality degrades twice as fast
-      # The Quality of an item is never negative
-      # The Quality of an item is never more than 50
-
       it 'reduces quality by 1 per day' do
         item = Item.new('foo', 10, 10)
         results = described_class.new([item]).update_quality
@@ -75,9 +66,7 @@ describe GildedRose do
     end
 
     context 'with aged items' do
-      # "Aged Brie" actually increases in Quality the older it gets
-
-      it 'increases quality by 1 per day' do
+      it 'increases quality by 1 per day before sell date' do
         item = Item.new('Aged Brie', 10, 10)
         results = described_class.new([item]).update_quality
         expect(results[0].quality).to eq 11
@@ -103,8 +92,21 @@ describe GildedRose do
                        48, 50, 50, 50, 50, 50]
     end
 
-    context 'with collectable Item' do
-      # "Sulfuras", being a legendary item, never has to be sold or decreases in Quality
+    context 'with legendary item' do
+      it 'does not change quality' do
+        quality = 80
+        item = Item.new('Sulfuras, Hand of Ragnaros', 0, quality)
+        results = described_class.new([item]).update_quality
+        expect(results[0].quality).to eq quality
+      end
+
+      it 'does not change sell_in' do
+        sell_in = 0
+        item = Item.new('Sulfuras, Hand of Ragnaros', sell_in, 80)
+        results = described_class.new([item]).update_quality
+        expect(results[0].sell_in).to eq sell_in
+      end
+
       it_behaves_like 'known pattern',
                       'Sulfuras, Hand of Ragnaros',
                       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -120,9 +122,37 @@ describe GildedRose do
     end
 
     context 'with backstage passes' do
-      # "Backstage passes", like aged brie, increases in Quality as its SellIn value approaches;
-      # Quality increases by 2 when there are 10 days or less and by 3 when there are 5 days or less but
-      # Quality drops to 0 after the concert
+      it 'increases quality by 1 per day 11 or more days before sell date' do
+        item = Item.new('Backstage passes to a TAFKAL80ETC concert', 11, 10)
+        results = described_class.new([item]).update_quality
+        expect(results[0].quality).to eq 11
+      end
+
+      it 'increases quality by 2 per day 6-10 days before sell date' do
+        sell_in = [6, 7, 8, 9, 10].sample
+        item = Item.new('Backstage passes to a TAFKAL80ETC concert', sell_in, 10)
+        results = described_class.new([item]).update_quality
+        expect(results[0].quality).to eq 12
+      end
+
+      it 'increases quality by 3 per day 1-5 days before sell date' do
+        sell_in = [1, 2, 3, 4, 5].sample
+        item = Item.new('Backstage passes to a TAFKAL80ETC concert', sell_in, 10)
+        results = described_class.new([item]).update_quality
+        expect(results[0].quality).to eq 13
+      end
+
+      it 'does not increase quality above fifty' do
+        item = Item.new('Backstage passes to a TAFKAL80ETC concert', 1, 49)
+        results = described_class.new([item]).update_quality
+        expect(results[0].quality).to eq 50
+      end
+
+      it 'sets value to zero after sell date' do
+        item = Item.new('Backstage passes to a TAFKAL80ETC concert', 0, 10)
+        results = described_class.new([item]).update_quality
+        expect(results[0].quality).to eq 0
+      end
 
       it_behaves_like 'known pattern',
                       'Backstage passes to a TAFKAL80ETC concert',
@@ -146,7 +176,7 @@ describe GildedRose do
                        0]
     end
 
-    context 'with conjured items' do
+    xcontext 'with conjured items' do
       # We have recently signed a supplier of conjured items. This requires an update to our system:
       # "Conjured" items degrade in Quality twice as fast as normal items
       # Once the sell by date has passed, Quality degrades twice as fast

@@ -1,7 +1,9 @@
-require: rubocop-rspec
+require:
+  - rubocop-rspec
+  - rubocop-performance
 
 AllCops:
-  NewCops: disable
+  NewCops: enable
   Exclude:
     - Gemfile
     - texttest_fixture.rb
@@ -11,11 +13,4 @@ Style/Documentation:
   Enabled: false
 
 Style/FrozenStringLiteralComment:
-  Enabled: false
-
-# TODO:
-RSpec/MultipleExpectations:
-  Enabled: false
-
-RSpec/ExampleLength:
   Enabled: false

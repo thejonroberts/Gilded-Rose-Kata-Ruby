@@ -45,13 +45,6 @@ class AgedItem < Item
   end
 end
 
-class ConjuredItem < Item
-  def update_quality
-    @quality += 1 if @sell_in.positive?
-    @quality = 0 if @sell_in.negative?
-  end
-end
-
 class BackstagePass < Item
   def update_quality
     @quality += 1
@@ -66,7 +59,6 @@ class GildedRose
   SPECIAL_ITEM_CLASSES = {
     'Sulfuras, Hand of Ragnaros' => CollectorsItem,
     'Aged Brie' => AgedItem,
-    'Conjured Mana Cake' => ConjuredItem,
     'Backstage passes to a TAFKAL80ETC concert' => BackstagePass
   }.freeze
 

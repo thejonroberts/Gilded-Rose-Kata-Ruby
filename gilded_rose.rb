@@ -7,6 +7,12 @@ class Item
     @quality = quality
   end
 
+  def to_s
+    "#{@name}, #{@sell_in}, #{@quality}"
+  end
+end
+
+class NormalItem < Item
   def end_of_day_update
     update_sell_in
     update_quality
@@ -26,26 +32,22 @@ class Item
     @quality = 0 if @quality.negative?
     @quality = 50 if @quality > 50
   end
-
-  def to_s
-    "#{@name}, #{@sell_in}, #{@quality}"
-  end
 end
 
-class CollectorsItem < Item
+class CollectorsItem < NormalItem
   def update_sell_in; end
   def update_quality; end
   def limit_quality; end
 end
 
-class AgedItem < Item
+class AgedItem < NormalItem
   def update_quality
     @quality += 1
     @quality += 1 if @sell_in.negative?
   end
 end
 
-class BackstagePass < Item
+class BackstagePass < NormalItem
   def update_quality
     @quality += 1
     @quality += 1 if @sell_in < 10
@@ -55,7 +57,7 @@ class BackstagePass < Item
 end
 
 class GildedRose
-  DEFAULT_ITEM_CLASS = Item
+  DEFAULT_ITEM_CLASS = NormalItem
   SPECIAL_ITEM_CLASSES = {
     'Sulfuras, Hand of Ragnaros' => CollectorsItem,
     'Aged Brie' => AgedItem,

@@ -73,16 +73,14 @@ class GildedRose
   }.freeze
 
   def initialize(items)
-    @items = items.map { |item| klass_for(item.name).new(item.name, item.sell_in, item.quality) }
+    @items = items
   end
 
   def update_quality
-    @items.each(&:end_of_day_update)
-  end
-
-  private
-
-  def klass_for(name)
-    SPECIAL_ITEM_CLASSES[name] || DEFAULT_ITEM_CLASS
+    @items.map do |item|
+      klass = SPECIAL_ITEM_CLASSES[item.name] || DEFAULT_ITEM_CLASS
+      klass.new(item.name, item.sell_in, item.quality)
+           .tap(&:end_of_day_update)
+    end
   end
 end

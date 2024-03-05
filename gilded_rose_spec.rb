@@ -189,7 +189,7 @@ describe GildedRose do
         expect(results[0].quality).to eq 0
       end
 
-      # NOTE: This is the original quality pattern from unimplemented test files, which does not match
+      # NOTE: This is the original unimplemented quality pattern from test files, which does not match
       # feature request. Used matches feature request/above specs.
       # [6, 5, 4, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
       it_behaves_like 'known pattern',
